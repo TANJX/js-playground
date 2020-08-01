@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style>
+    body {
+      margin: 0;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: sans-serif;
+    }
+
+    .table {
+      width: 5000px
+    }
+
+    .head-cell:nth-child(1), .cell:nth-child(1) {
+      width: 60px;
+      font-weight: bold;
+      padding-left: 20px;
+    }
+
+    .head-cell:nth-child(2), .cell:nth-child(2) {
+      width: 50px;
+    }
+
+    .head-cell:nth-child(3), .cell:nth-child(3) {
+      width: 50px;
+    }
+
+    .head-cell:nth-child(4), .cell:nth-child(4) {
+      width: 200px;
+    }
+
+    .cell, .head-cell {
+      border-collapse: collapse;
+      width: 30px;
+      display: inline-block;
+    }
+
+    .row {
+      display: flex;
+    }
+
+    .cell {
+      border: 1px solid #a3a3a3;
+      height: 30px;
+      padding-top: 6px;
+      padding-left: 8px;
+    }
+
+    .bad {
+      background-color: #ff6e6e;
+    }
+
+    .ok {
+      background-color: #ffbe6e;
+    }
+
+    .good {
+      background-color: #c2ffc4;
+    }
+
+    .up {
+      color: #06ec09;
+      font-weight: bold;
+    }
+
+    .down {
+      color: #f14646;
+      font-weight: bold;
+    }
+
+    .same {
+      color: #4e4e4e;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+<div class="table">
+  <div class="head-row">
+    <!-- rank -->
+    <div class="head-cell"></div>
+
+    <!-- rankLastWeek -->
+    <div class="head-cell"></div>
+
+    <!-- id -->
+    <div class="head-cell"></div>
+
+    <!-- name -->
+    <div class="head-cell"></div>
+  </div>
+</div>
+<script src="courses.js"></script>
+<script src="users.js"></script>
+<script src="results.js"></script>
+<script>
+// sort
+const allCourses = courses.map(c => c.id);
+
+const userCompleteCount = {};
+const userLastWeekCompleteCount = {};
+
+for (const u of users) {
+  userCompleteCount[u.id] = 0;
+  for (const assignmentId of Object.keys(data[u.id])) {
+    if (allCourses.includes(assignmentId))
+      userCompleteCount[u.id] += data[u.id][assignmentId];
+  }
+  userLastWeekCompleteCount[u.id] = 0;
+  for (const assignmentId of Object.keys(lastWeek[u.id])) {
+    if (allCourses.includes(assignmentId))
+      userLastWeekCompleteCount[u.id] += lastWeek[u.id][assignmentId];
+  }
+}
+
+users.sort((a, b) => userCompleteCount[b.id] - userCompleteCount[a.id]);
+
+const lastWeekRankUser = users.slice();
+lastWeekRankUser.sort((a, b) => userLastWeekCompleteCount[b.id] - userLastWeekCompleteCount[a.id]);
+const lastWeekRankUserMap = {};
+let count = 1;
+let lastCount = 1;
+let lastScore = -1;
+for (const u of lastWeekRankUser) {
+  let currentRank;
+  if (userLastWeekCompleteCount[u.id] === lastScore) {
+    currentRank = lastCount;
+  } else {
+    currentRank = count;
+    lastCount = count;
+    lastScore = userLastWeekCompleteCount[u.id];
+  }
+  lastWeekRankUserMap[u.id] = currentRank;
+  count++;
+}
+
+const thead = document.querySelector('.head-row');
+for (const c of courses) {
+  const th = document.createElement('div');
+  th.classList.add('head-cell');
+  th.textContent = c.name;
+  thead.append(th);
+}
+const table = document.querySelector('.table');
+count = 1;
+lastCount = 1;
+lastScore = -1;
+for (const u of users) {
+  let currentRank;
+  if (userCompleteCount[u.id] === lastScore) {
+    currentRank = lastCount;
+  } else {
+    currentRank = count;
+    lastCount = count;
+    lastScore = userCompleteCount[u.id];
+  }
+
+  const tr = document.createElement('div');
+  tr.classList.add('row');
+
+  const c_count = document.createElement('div');
+  c_count.classList.add('cell');
+  c_count.textContent = "" + currentRank;
+  tr.append(c_count);
+
+  const c_count_last = document.createElement('div');
+  c_count_last.classList.add('cell');
+  let lastW;
+  if (lastWeekRankUserMap[u.id] === currentRank) {
+    lastW = '-';
+    c_count_last.classList.add('same');
+  } else if (lastWeekRankUserMap[u.id] > currentRank) {
+    lastW = lastWeekRankUserMap[u.id] - currentRank;
+    lastW = '↑' + lastW;
+    c_count_last.classList.add('up');
+  } else {
+    lastW = currentRank - lastWeekRankUserMap[u.id];
+    lastW = '↓' + lastW;
+    c_count_last.classList.add('down');
+  }
+  c_count_last.textContent = "" + lastW;
+  tr.append(c_count_last);
+
+  const c_index = document.createElement('div');
+  c_index.classList.add('cell');
+  c_index.textContent = u.index;
+  tr.append(c_index);
+
+  const c_name = document.createElement('div');
+  c_name.classList.add('cell');
+  c_name.textContent = u.name;
+  tr.append(c_name);
+
+  for (const c of courses) {
+    const c_class = document.createElement('div');
+    c_class.classList.add('cell');
+    let grade = '';
+    switch (data[u.id][c.id]) {
+      case(1):
+        grade = 'D';
+        c_class.classList.add('bad');
+        break;
+      case(2):
+        grade = 'C';
+        c_class.classList.add('bad');
+        break;
+      case(3):
+        grade = 'B';
+        c_class.classList.add('ok');
+        break;
+      case(4):
+        grade = 'A';
+        c_class.classList.add('good');
+        break;
+    }
+    c_class.textContent = grade;
+    tr.append(c_class);
+  }
+
+  table.append(tr);
+
+  count++;
+}
+</script>
+</body>
+</html>
