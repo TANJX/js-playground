@@ -15,7 +15,7 @@ async function postAndUpdateMap(user_id, form, userMap, userLastWeekScore) {
     }
     if (a.sumTotalScore && (!userLastWeekScore[user_id][a.subjectId] || userLastWeekScore[user_id][a.subjectId] < a.sumTotalScore)) {
       const date = new Date(a.createAt);
-      if (date.getTime() <= 1595714400000+1000*60*60*24*7*3) {
+      if (date.getTime() <= 1595714400000+1000*60*60*24*7*8) {
         userLastWeekScore[user_id][a.subjectId] = a.sumTotalScore;
       }
     }

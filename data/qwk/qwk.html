@@ -188,8 +188,12 @@ for (const u of users) {
   tr.append(c_count_last);
 
   const c_index = document.createElement('div');
+  const c_index_a = document.createElement('a');
   c_index.classList.add('cell');
-  c_index.textContent = u.index;
+  c_index_a.textContent = u.index;
+  c_index_a.href = `https://www.qingwk.com/u/${u.id}`;
+  c_index_a.target = "_blank"
+  c_index.append(c_index_a);
   tr.append(c_index);
 
   const c_name = document.createElement('div');
